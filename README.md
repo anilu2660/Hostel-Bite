@@ -239,4 +239,4 @@ This is a demo project for educational purposes.
 
 ---
 
-**Built with ❤️ for hostel students**
+**Built for ❤️ for hostel canteen and mess students**
