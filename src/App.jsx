@@ -1,5 +1,3 @@
-console.log("API URL =", import.meta.env.VITE_API_URL);
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './context/ThemeContext';
