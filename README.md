@@ -153,6 +153,8 @@ Mobile-first approach with breakpoints:
 - Email: `admin@canteen.com`
 - Password: `admin123`
 
+### Website URL: https://hostel-bite-topaz.vercel.app/
+
 ### Student Access
 - Email: Any valid email
 - Password: Any password (6+ characters)
