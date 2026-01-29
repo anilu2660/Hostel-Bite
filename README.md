@@ -236,6 +236,7 @@ This is a demo project for educational purposes.
 - Three.js community
 - Tailwind CSS team
 - Framer Motion developers
+- Built for Hostel Canteen and Student 
 
 ---
 
