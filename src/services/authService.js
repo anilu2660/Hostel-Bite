@@ -12,8 +12,8 @@ export const authService = {
   },
 
   // Login user
-  login: async (email, password) => {
-    const response = await api.post('/auth/login', { email, password });
+  login: async (email, password, loginType = 'student') => {
+    const response = await api.post('/auth/login', { email, password, loginType });
     if (response.data.success) {
       localStorage.setItem('token', response.data.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.data));
@@ -37,5 +37,33 @@ export const authService = {
   getUserFromStorage: () => {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;
+  },
+
+  // Send OTP to email
+  sendOTP: async (email) => {
+    const response = await api.post('/auth/send-otp', { email });
+    return response.data;
+  },
+
+  // Verify OTP
+  verifyOTP: async (email, otp) => {
+    const response = await api.post('/auth/verify-otp', { email, otp });
+    if (response.data.success && response.data.data) {
+      localStorage.setItem('token', response.data.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.data));
+    }
+    return response.data;
+  },
+
+  // Forgot password - send reset email
+  forgotPassword: async (email) => {
+    const response = await api.post('/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  // Reset password with token
+  resetPassword: async (token, password) => {
+    const response = await api.post(`/auth/reset-password/${token}`, { password });
+    return response.data;
   },
 };

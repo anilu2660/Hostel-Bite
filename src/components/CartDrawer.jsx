@@ -1,6 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { drawerVariants } from '../utils/animations';
+import { paymentService } from '../services/paymentService';
+import { initiatePayment } from '../utils/razorpay';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 const CartDrawer = () => {
     const {
@@ -12,6 +18,102 @@ const CartDrawer = () => {
         getTotalPrice,
         clearCart
     } = useCart();
+    const { user } = useAuth();
+    const navigate = useNavigate();
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    const handleCheckout = async () => {
+        if (!user) {
+            toast.error('Please login to proceed with checkout');
+            navigate('/login');
+            return;
+        }
+
+        if (cartItems.length === 0) {
+            toast.error('Your cart is empty');
+            return;
+        }
+
+        setIsProcessing(true);
+
+        try {
+            const totalAmount = getTotalPrice();
+
+            // Step 1: Create Razorpay order
+            const orderResponse = await paymentService.createOrder(totalAmount);
+
+            if (!orderResponse.success) {
+                throw new Error('Failed to create payment order');
+            }
+
+            const { orderId, amount, currency, keyId } = orderResponse.data;
+
+            // Step 2: Initiate Razorpay payment
+            const options = {
+                key: keyId,
+                amount: amount,
+                currency: currency,
+                name: 'HostelBite',
+                description: 'Food Order Payment',
+                order_id: orderId,
+                handler: async function (response) {
+                    try {
+                        // Step 3: Verify payment
+                        const verifyResponse = await paymentService.verifyPayment({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                        });
+
+                        if (verifyResponse.success) {
+                            // Step 4: Complete order
+                            const completeResponse = await paymentService.completeOrder({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                items: cartItems.map((item) => ({
+                                    menuItem: item._id || item.id,
+                                    name: item.name,
+                                    quantity: item.quantity,
+                                    price: item.price,
+                                })),
+                                totalAmount: totalAmount,
+                                deliveryAddress: {
+                                    hostelId: user.hostelId,
+                                    roomNumber: user.roomNumber,
+                                },
+                            });
+
+                            if (completeResponse.success) {
+                                clearCart();
+                                setIsCartOpen(false);
+                                toast.success(`Order placed successfully! Order #${completeResponse.data.orderNumber}`);
+                                navigate('/orders');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Payment verification error:', error);
+                        toast.error('Payment verification failed. Please contact support.');
+                    } finally {
+                        setIsProcessing(false);
+                    }
+                },
+                prefill: {
+                    name: user.name,
+                    email: user.email,
+                },
+                theme: {
+                    color: '#8B5CF6',
+                },
+            };
+
+            await initiatePayment(options);
+        } catch (error) {
+            console.error('Checkout error:', error);
+            toast.error(error.message || 'Failed to initiate payment. Please try again.');
+            setIsProcessing(false);
+        }
+    };
 
     return (
         <AnimatePresence>
@@ -137,8 +239,12 @@ const CartDrawer = () => {
                                     <span className="text-2xl text-primary-500">₹{getTotalPrice()}</span>
                                 </div>
 
-                                <button className="w-full btn-primary py-4 text-lg">
-                                    Proceed to Checkout
+                                <button
+                                    onClick={handleCheckout}
+                                    disabled={isProcessing}
+                                    className="w-full btn-primary py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isProcessing ? 'Processing...' : 'Proceed to Checkout'}
                                 </button>
 
                                 <button

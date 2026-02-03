@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { pageTransition, fadeIn } from '../utils/animations';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -10,6 +9,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [loginType, setLoginType] = useState('student'); // 'student' or 'admin'
+    const [showPassword, setShowPassword] = useState(false);
     const { login, user } = useAuth();
     const navigate = useNavigate();
 
@@ -23,9 +23,15 @@ const Login = () => {
         setLoading(true);
 
         try {
-            const result = await login(email, password);
+            const result = await login(email, password, loginType);
             if (result.success) {
                 navigate('/');
+            } else if (result.message) {
+                // Display error with hint if available
+                const errorMsg = result.hint
+                    ? `${result.message}\n💡 ${result.hint}`
+                    : result.message;
+                setError(errorMsg);
             }
         } catch (err) {
             setError('Failed to login. Please try again.');
@@ -34,182 +40,303 @@ const Login = () => {
         }
     };
 
-    const fillAdminCredentials = () => {
-        setEmail('admin@canteen.com');
-        setPassword('admin123');
-        setLoginType('admin');
-    };
-
-    const fillStudentCredentials = () => {
-        setEmail('student@example.com');
-        setPassword('student123');
-        setLoginType('student');
-    };
-
     return (
-        <motion.div
-            variants={pageTransition}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="min-h-screen flex items-center justify-center bg-gradient-mesh py-12 px-4 sm:px-6 lg:px-8"
-        >
-            <motion.div
-                variants={fadeIn}
-                className="max-w-md w-full"
-            >
-                <div className="card-glass p-8">
-                    {/* Header */}
-                    <div className="text-center mb-8">
-                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white dark:bg-dark-800 p-2 shadow-lg">
-                            <img src="/logo.png" alt="HostelBite Logo" className="w-full h-full object-contain" />
-                        </div>
-                        <h2 className="text-3xl font-display font-bold text-gray-900 dark:text-white mb-2">
-                            Welcome Back!
-                        </h2>
-                        <p className="text-gray-600 dark:text-gray-400">
-                            Login to order delicious food
-                        </p>
-                    </div>
+        <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
+            {/* Animated Background Elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {/* Floating Orbs */}
+                <motion.div
+                    animate={{
+                        y: [0, -30, 0],
+                        x: [0, 20, 0],
+                        scale: [1, 1.1, 1],
+                    }}
+                    transition={{
+                        duration: 8,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                    className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-20 blur-3xl"
+                />
+                <motion.div
+                    animate={{
+                        y: [0, 40, 0],
+                        x: [0, -30, 0],
+                        scale: [1, 1.2, 1],
+                    }}
+                    transition={{
+                        duration: 10,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                    className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full opacity-20 blur-3xl"
+                />
+                <motion.div
+                    animate={{
+                        y: [0, -20, 0],
+                        x: [0, 15, 0],
+                    }}
+                    transition={{
+                        duration: 6,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                    className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full opacity-15 blur-3xl"
+                />
+            </div>
 
-                    {/* Login Type Tabs */}
-                    <div className="flex gap-2 mb-6">
-                        <button
-                            type="button"
-                            onClick={() => setLoginType('student')}
-                            className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all duration-300 ${loginType === 'student'
-                                    ? 'gradient-primary text-white shadow-lg'
-                                    : 'glass hover:shadow-md'
-                                }`}
-                        >
-                            <span className="flex items-center justify-center space-x-2">
-                                <span>👨‍🎓</span>
-                                <span>Student</span>
-                            </span>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setLoginType('admin')}
-                            className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all duration-300 ${loginType === 'admin'
-                                    ? 'gradient-secondary text-white shadow-lg'
-                                    : 'glass hover:shadow-md'
-                                }`}
-                        >
-                            <span className="flex items-center justify-center space-x-2">
-                                <span>👨‍💼</span>
-                                <span>Admin</span>
-                            </span>
-                        </button>
-                    </div>
+            {/* Main Content */}
+            <div className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="max-w-md w-full"
+                >
+                    {/* 3D Card Container */}
+                    <motion.div
+                        initial={{ rotateY: -10, rotateX: 10 }}
+                        animate={{ rotateY: 0, rotateX: 0 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        style={{ perspective: "1000px" }}
+                        className="relative"
+                    >
+                        <div className="relative backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/50 p-8 overflow-hidden">
+                            {/* Animated Gradient Border */}
+                            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500" />
 
-                    {/* Quick Fill Demo Credentials */}
-                    <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <p className="text-sm text-blue-800 dark:text-blue-300 font-semibold mb-3">
-                            Quick Login (Demo):
-                        </p>
-                        <div className="flex gap-2">
-                            <button
-                                type="button"
-                                onClick={fillStudentCredentials}
-                                className="flex-1 px-3 py-2 bg-white dark:bg-dark-700 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-600 transition-colors"
+                            {/* Header with 3D Effect */}
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ delay: 0.2, duration: 0.5 }}
+                                className="text-center mb-8 relative z-10"
                             >
-                                Fill Student
-                            </button>
-                            <button
-                                type="button"
-                                onClick={fillAdminCredentials}
-                                className="flex-1 px-3 py-2 bg-white dark:bg-dark-700 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-600 transition-colors"
+                                <motion.div
+                                    whileHover={{ scale: 1.1, rotateY: 180 }}
+                                    transition={{ duration: 0.6 }}
+                                    className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 p-1 shadow-lg"
+                                    style={{ transformStyle: "preserve-3d" }}
+                                >
+                                    <div className="w-full h-full rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center text-4xl">
+                                        🍽️
+                                    </div>
+                                </motion.div>
+                                <h2 className="text-4xl font-display font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent mb-2">
+                                    Welcome Back!
+                                </h2>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                    Login to order delicious food
+                                </p>
+                            </motion.div>
+
+                            {/* Login Type Tabs with 3D Effect */}
+                            <motion.div
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.3, duration: 0.5 }}
+                                className="flex gap-3 mb-6 relative z-10"
                             >
-                                Fill Admin
-                            </button>
-                        </div>
-                    </div>
+                                <motion.button
+                                    whileHover={{ scale: 1.05, y: -2 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    type="button"
+                                    onClick={() => setLoginType('student')}
+                                    className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${loginType === 'student'
+                                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/50'
+                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:shadow-md'
+                                        }`}
+                                    style={{
+                                        transform: loginType === 'student' ? 'translateZ(10px)' : 'translateZ(0)',
+                                        transformStyle: 'preserve-3d'
+                                    }}
+                                >
+                                    <span className="flex items-center justify-center space-x-2">
+                                        <span>👨‍🎓</span>
+                                        <span>Student</span>
+                                    </span>
+                                </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.05, y: -2 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    type="button"
+                                    onClick={() => setLoginType('admin')}
+                                    className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${loginType === 'admin'
+                                        ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/50'
+                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:shadow-md'
+                                        }`}
+                                    style={{
+                                        transform: loginType === 'admin' ? 'translateZ(10px)' : 'translateZ(0)',
+                                        transformStyle: 'preserve-3d'
+                                    }}
+                                >
+                                    <span className="flex items-center justify-center space-x-2">
+                                        <span>👨‍💼</span>
+                                        <span>Admin</span>
+                                    </span>
+                                </motion.button>
+                            </motion.div>
 
-                    {/* Error Message */}
-                    {error && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
-                        >
-                            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-                        </motion.div>
-                    )}
-
-                    {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Email Address
-                            </label>
-                            <input
-                                id="email"
-                                type="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="input-field"
-                                placeholder={loginType === 'admin' ? 'admin@canteen.com' : 'your.email@example.com'}
-                            />
-                        </div>
-
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Password
-                            </label>
-                            <input
-                                id="password"
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="input-field"
-                                placeholder="••••••••"
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className={`w-full py-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed ${loginType === 'admin' ? 'btn-secondary' : 'btn-primary'
-                                }`}
-                        >
-                            {loading ? (
-                                <span className="flex items-center justify-center space-x-2">
-                                    <span className="animate-spin">⏳</span>
-                                    <span>Logging in...</span>
-                                </span>
-                            ) : (
-                                `Login as ${loginType === 'admin' ? 'Admin' : 'Student'}`
+                            {/* Error Message with Animation */}
+                            {error && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10, scale: 0.9 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9 }}
+                                    className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl relative z-10"
+                                >
+                                    <div className="flex items-start">
+                                        <span className="mr-2 text-lg">⚠️</span>
+                                        <div className="flex-1">
+                                            <p className="text-sm text-red-600 dark:text-red-400 font-semibold mb-1">
+                                                {error.split('\n')[0]}
+                                            </p>
+                                            {error.includes('💡') && (
+                                                <p className="text-xs text-red-500 dark:text-red-300 mt-2">
+                                                    {error.split('\n')[1]}
+                                                </p>
+                                            )}
+                                            {error.includes('No account found') && (
+                                                <Link
+                                                    to="/signup"
+                                                    className="inline-block mt-3 text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 underline"
+                                                >
+                                                    Create a new account →
+                                                </Link>
+                                            )}
+                                        </div>
+                                    </div>
+                                </motion.div>
                             )}
-                        </button>
-                    </form>
 
-                    {/* Info Box */}
-                    {loginType === 'admin' && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            className="mt-4 p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg border border-cyan-200 dark:border-cyan-800"
-                        >
-                            <p className="text-xs text-cyan-800 dark:text-cyan-300">
-                                <strong>Admin Access:</strong> After login, you'll see the "Admin Panel" button in the navbar to access dashboard, menu management, and orders.
-                            </p>
-                        </motion.div>
-                    )}
+                            {/* Form with 3D Inputs */}
+                            <motion.form
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.4, duration: 0.5 }}
+                                onSubmit={handleSubmit}
+                                className="space-y-6 relative z-10"
+                            >
+                                <div>
+                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Email Address
+                                    </label>
+                                    <motion.div whileFocus={{ scale: 1.02 }} className="relative">
+                                        <input
+                                            id="email"
+                                            type="email"
+                                            required
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-purple-500 dark:focus:border-purple-400 focus:ring-4 focus:ring-purple-500/20 transition-all duration-300 outline-none"
+                                            placeholder={loginType === 'admin' ? 'admin@canteen.com' : 'your.email@example.com'}
+                                            style={{ transformStyle: 'preserve-3d' }}
+                                        />
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                            📧
+                                        </div>
+                                    </motion.div>
+                                </div>
 
-                    {/* Footer */}
-                    <div className="mt-6 text-center">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Don't have an account?{' '}
-                            <Link to="/signup" className="text-primary-500 hover:text-primary-600 font-semibold">
-                                Sign up
-                            </Link>
-                        </p>
-                    </div>
-                </div>
-            </motion.div>
-        </motion.div>
+                                <div>
+                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Password
+                                    </label>
+                                    <motion.div whileFocus={{ scale: 1.02 }} className="relative">
+                                        <input
+                                            id="password"
+                                            type={showPassword ? 'text' : 'password'}
+                                            required
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-purple-500 dark:focus:border-purple-400 focus:ring-4 focus:ring-purple-500/20 transition-all duration-300 outline-none pr-12"
+                                            placeholder="••••••••"
+                                            style={{ transformStyle: 'preserve-3d' }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                                        >
+                                            {showPassword ? '👁️' : '👁️‍🗨️'}
+                                        </button>
+                                    </motion.div>
+                                    <div className="mt-2 text-right">
+                                        <Link
+                                            to="/forgot-password"
+                                            className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-semibold transition-colors"
+                                        >
+                                            Forgot Password?
+                                        </Link>
+                                    </div>
+                                </div>
+
+                                <motion.button
+                                    whileHover={{ scale: 1.02, y: -2 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    type="submit"
+                                    disabled={loading}
+                                    className={`w-full py-4 rounded-xl text-lg font-semibold text-white shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${loginType === 'admin'
+                                        ? 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-blue-500/50'
+                                        : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-purple-500/50'
+                                        }`}
+                                    style={{ transformStyle: 'preserve-3d' }}
+                                >
+                                    {loading ? (
+                                        <span className="flex items-center justify-center space-x-2">
+                                            <motion.span
+                                                animate={{ rotate: 360 }}
+                                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                            >
+                                                ⏳
+                                            </motion.span>
+                                            <span>Logging in...</span>
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center justify-center space-x-2">
+                                            <span>Login as {loginType === 'admin' ? 'Admin' : 'Student'}</span>
+                                            <span>→</span>
+                                        </span>
+                                    )}
+                                </motion.button>
+                            </motion.form>
+
+                            {/* Admin Info */}
+                            {loginType === 'admin' && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="mt-4 p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border border-cyan-200 dark:border-cyan-800 relative z-10"
+                                >
+                                    <p className="text-xs text-cyan-800 dark:text-cyan-300">
+                                        <strong>Admin Access:</strong> After login, you'll see the "Admin Panel" button in the navbar.
+                                    </p>
+                                </motion.div>
+                            )}
+
+                            {/* Footer */}
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.6, duration: 0.5 }}
+                                className="mt-6 text-center relative z-10"
+                            >
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    Don't have an account?{' '}
+                                    <Link
+                                        to="/signup"
+                                        className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-semibold transition-colors"
+                                    >
+                                        Sign up
+                                    </Link>
+                                </p>
+                            </motion.div>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            </div>
+        </div>
     );
 };
 

@@ -25,9 +25,9 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    const login = async (email, password) => {
+    const login = async (email, password, loginType = 'student') => {
         try {
-            const response = await authService.login(email, password);
+            const response = await authService.login(email, password, loginType);
             if (response.success) {
                 setUser(response.data);
                 toast.success(`Welcome back, ${response.data.name}!`);
@@ -35,8 +35,11 @@ export const AuthProvider = ({ children }) => {
             }
         } catch (error) {
             const message = error.response?.data?.message || 'Login failed';
-            toast.error(message);
-            return { success: false, message };
+            const hint = error.response?.data?.hint;
+
+            // Return error data without showing toast
+            // Let the Login component display the error
+            return { success: false, message, hint };
         }
     };
 

@@ -27,8 +27,15 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Don't redirect on 401 for login/register/auth endpoints
+    // These endpoints need to show error messages to the user
+    const isAuthEndpoint = error.config?.url?.includes('/auth/login') || 
+                          error.config?.url?.includes('/auth/register') ||
+                          error.config?.url?.includes('/auth/verify-otp');
+    
+    if (error.response?.status === 401 && !isAuthEndpoint) {
       // Unauthorized - clear token and redirect to login
+      // Only for authenticated endpoints, not login itself
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
