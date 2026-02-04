@@ -185,7 +185,8 @@ const Contact = () => {
                                         <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Location</h3>
                                         <p className="text-gray-600 dark:text-gray-400">
                                             Campus Hostel Canteen<br />
-                                            Your University Campus
+                                            Amity University Mumbai Campus
+                                            Panvel, Maharashtra 410206
                                         </p>
                                     </div>
                                 </motion.div>
@@ -283,8 +284,8 @@ const Contact = () => {
                                                     >
                                                         <span
                                                             className={`text-5xl transition-all duration-200 ${star <= (hoveredStar || formData.rating)
-                                                                    ? 'text-yellow-400 drop-shadow-lg'
-                                                                    : 'text-gray-300 dark:text-gray-600'
+                                                                ? 'text-yellow-400 drop-shadow-lg'
+                                                                : 'text-gray-300 dark:text-gray-600'
                                                                 }`}
                                                         >
                                                             ⭐
@@ -321,8 +322,8 @@ const Contact = () => {
                                                         whileTap={{ scale: 0.95 }}
                                                         onClick={() => setFormData({ ...formData, category: cat.value })}
                                                         className={`p-3 rounded-xl border-2 transition-all duration-300 ${formData.category === cat.value
-                                                                ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
-                                                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                                                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
+                                                            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                                                             }`}
                                                     >
                                                         <span className="text-2xl block mb-1">{cat.icon}</span>
