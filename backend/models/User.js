@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const userSchema = new mongoose.Schema(
   {
@@ -106,7 +107,6 @@ userSchema.methods.verifyOTP = async function (enteredOTP) {
 
 // Generate password reset token
 userSchema.methods.generatePasswordResetToken = function () {
-  const crypto = require('crypto');
   const resetToken = crypto.randomBytes(32).toString('hex');
   
   // Hash token before saving
@@ -132,7 +132,6 @@ userSchema.methods.verifyResetToken = function (token) {
     return false;
   }
   
-  const crypto = require('crypto');
   const hashedToken = crypto
     .createHash('sha256')
     .update(token)

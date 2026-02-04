@@ -87,8 +87,8 @@ const CartDrawer = () => {
                             if (completeResponse.success) {
                                 clearCart();
                                 setIsCartOpen(false);
-                                toast.success(`Order placed successfully! Order #${completeResponse.data.orderNumber}`);
-                                navigate('/orders');
+                                // Redirect to order success page with order ID
+                                navigate(`/order-success?orderId=${completeResponse.data._id}`);
                             }
                         }
                     } catch (error) {

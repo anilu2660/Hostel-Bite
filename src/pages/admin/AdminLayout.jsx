@@ -12,7 +12,8 @@ const AdminLayout = () => {
     const menuItems = [
         { name: 'Dashboard', path: '/admin', icon: '📊' },
         { name: 'Manage Menu', path: '/admin/menu', icon: '🍽️' },
-        { name: 'Orders', path: '/admin/orders', icon: '📦' }
+        { name: 'Orders', path: '/admin/orders', icon: '📦' },
+        { name: 'Feedback', path: '/admin/feedback', icon: '⭐' }
     ];
 
     return (

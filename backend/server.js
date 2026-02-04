@@ -7,15 +7,21 @@ import rateLimit from 'express-rate-limit';
 import connectDB from './config/db.js';
 import errorHandler from './middleware/errorHandler.js';
 
-// Routes
+// Load env vars FIRST before importing routes
+dotenv.config();
+
+// Debug: Check if Razorpay credentials are loaded
+console.log('🔍 Checking Razorpay credentials...');
+console.log('RAZORPAY_KEY_ID:', process.env.RAZORPAY_KEY_ID ? '✅ SET' : '❌ NOT SET');
+console.log('RAZORPAY_KEY_SECRET:', process.env.RAZORPAY_KEY_SECRET ? '✅ SET' : '❌ NOT SET');
+
+// Routes (imported after env vars are loaded)
 import authRoutes from './routes/auth.js';
 import menuRoutes from './routes/menu.js';
 import orderRoutes from './routes/orders.js';
 import statsRoutes from './routes/stats.js';
 import paymentRoutes from './routes/payment.js';
-
-// Load env vars
-dotenv.config();
+import feedbackRoutes from './routes/feedback.js';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -54,6 +60,7 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

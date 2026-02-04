@@ -1,8 +1,12 @@
 import express from 'express';
+import dotenv from 'dotenv';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import Order from '../models/Order.js';
 import { protect } from '../middleware/auth.js';
+
+// Load environment variables
+dotenv.config();
 
 const router = express.Router();
 
@@ -15,8 +19,11 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
     key_secret: process.env.RAZORPAY_KEY_SECRET,
   });
   console.log('✅ Razorpay initialized successfully');
+  console.log('   Key ID:', process.env.RAZORPAY_KEY_ID.substring(0, 15) + '...');
 } else {
   console.warn('⚠️  Razorpay credentials not configured. Payment features will be disabled.');
+  console.warn('   RAZORPAY_KEY_ID:', process.env.RAZORPAY_KEY_ID ? 'SET' : 'NOT SET');
+  console.warn('   RAZORPAY_KEY_SECRET:', process.env.RAZORPAY_KEY_SECRET ? 'SET' : 'NOT SET');
 }
 
 // @route   POST /api/payment/create-order
@@ -140,8 +147,14 @@ router.post('/complete', protect, async (req, res, next) => {
       });
     }
 
+    // Generate order number
+    const year = new Date().getFullYear();
+    const orderCount = await Order.countDocuments();
+    const orderNumber = `ORD-${year}-${String(orderCount + 1).padStart(4, '0')}`;
+
     // Create order
     const order = await Order.create({
+      orderNumber,
       user: req.user._id,
       items,
       totalAmount,

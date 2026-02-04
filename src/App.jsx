@@ -12,6 +12,7 @@ import ParticleBackground from './components/effects/ParticleBackground';
 import Home from './pages/Home';
 import Menu from './pages/Menu';
 import Orders from './pages/Orders';
+import OrderSuccess from './pages/OrderSuccess';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
@@ -20,6 +21,8 @@ import AdminLayout from './pages/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
 import ManageMenu from './pages/admin/ManageMenu';
 import OrdersList from './pages/admin/OrdersList';
+import FeedbackList from './pages/admin/FeedbackList';
+import Contact from './pages/Contact';
 
 function App() {
   return (
@@ -65,16 +68,19 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/menu" element={<Menu />} />
                 <Route path="/orders" element={<Orders />} />
+                <Route path="/order-success" element={<OrderSuccess />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password/:token" element={<ResetPassword />} />
+                <Route path="/contact" element={<Contact />} />
 
                 {/* Admin Routes */}
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<Dashboard />} />
                   <Route path="menu" element={<ManageMenu />} />
                   <Route path="orders" element={<OrdersList />} />
+                  <Route path="feedback" element={<FeedbackList />} />
                 </Route>
               </Routes>
 
