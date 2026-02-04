@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
@@ -24,6 +24,19 @@ import OrdersList from './pages/admin/OrdersList';
 import FeedbackList from './pages/admin/FeedbackList';
 import Contact from './pages/Contact';
 
+// Layout for public pages
+const PublicLayout = () => {
+  return (
+    <>
+      <ParticleBackground />
+      <Navbar />
+      <CartDrawer />
+      <Outlet />
+      <Footer />
+    </>
+  );
+};
+
 function App() {
   return (
     <ThemeProvider>
@@ -33,7 +46,6 @@ function App() {
             <div className="min-h-screen bg-white dark:bg-dark-900 transition-colors duration-300 relative overflow-x-hidden">
               <ScrollProgress />
               <CursorGlow />
-              <ParticleBackground />
 
               <Toaster
                 position="top-right"
@@ -60,22 +72,21 @@ function App() {
                 }}
               />
 
-              <Navbar />
-              <CartDrawer />
-
               <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/menu" element={<Menu />} />
-                <Route path="/orders" element={<Orders />} />
-                <Route path="/order-success" element={<OrderSuccess />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password/:token" element={<ResetPassword />} />
-                <Route path="/contact" element={<Contact />} />
+                {/* Public Routes - Wrapped in PublicLayout */}
+                <Route element={<PublicLayout />}>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/menu" element={<Menu />} />
+                  <Route path="/orders" element={<Orders />} />
+                  <Route path="/order-success" element={<OrderSuccess />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password/:token" element={<ResetPassword />} />
+                  <Route path="/contact" element={<Contact />} />
+                </Route>
 
-                {/* Admin Routes */}
+                {/* Admin Routes - Standalone Layout */}
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<Dashboard />} />
                   <Route path="menu" element={<ManageMenu />} />
@@ -83,8 +94,6 @@ function App() {
                   <Route path="feedback" element={<FeedbackList />} />
                 </Route>
               </Routes>
-
-              <Footer />
             </div>
           </Router>
         </CartProvider>

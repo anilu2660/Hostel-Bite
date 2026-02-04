@@ -3,7 +3,6 @@ import { staggerContainer, staggerItem } from '../../utils/animations';
 import { useState, useEffect } from 'react';
 import { statsService } from '../../services/statsService';
 import { orderService } from '../../services/orderService';
-import { menuService } from '../../services/menuService';
 import { useNavigate } from 'react-router-dom';
 
 const AnimatedNumber = ({ end, duration = 2, prefix = '', suffix = '' }) => {
@@ -82,29 +81,33 @@ const Dashboard = () => {
             value: stats.totalOrdersToday || 0,
             icon: '📦',
             color: 'from-blue-500 to-cyan-500',
-            bgColor: 'from-blue-500/20 to-cyan-500/20'
+            bgColor: 'from-blue-500/10 to-cyan-500/10',
+            shadowColor: 'shadow-blue-500/50'
         },
         {
             label: 'Revenue Today',
             value: stats.revenueToday || 0,
             icon: '💰',
             color: 'from-green-500 to-emerald-500',
-            bgColor: 'from-green-500/20 to-emerald-500/20',
-            prefix: '₹'
+            bgColor: 'from-green-500/10 to-emerald-500/10',
+            prefix: '₹',
+            shadowColor: 'shadow-green-500/50'
         },
         {
             label: 'Active Orders',
             value: stats.activeOrders || 0,
             icon: '🔥',
             color: 'from-orange-500 to-red-500',
-            bgColor: 'from-orange-500/20 to-red-500/20'
+            bgColor: 'from-orange-500/10 to-red-500/10',
+            shadowColor: 'shadow-orange-500/50'
         },
         {
             label: 'Total Menu Items',
             value: stats.totalMenuItems || 0,
             icon: '🍽️',
             color: 'from-purple-500 to-pink-500',
-            bgColor: 'from-purple-500/20 to-pink-500/20'
+            bgColor: 'from-purple-500/10 to-pink-500/10',
+            shadowColor: 'shadow-purple-500/50'
         }
     ];
 
@@ -121,34 +124,28 @@ const Dashboard = () => {
 
     return (
         <div className="relative">
-            {/* Background Gradient Orbs */}
+            {/* Floating Particles */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <motion.div
-                    animate={{
-                        scale: [1, 1.2, 1],
-                        x: [0, 50, 0],
-                        y: [0, -30, 0],
-                    }}
-                    transition={{
-                        duration: 15,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                    }}
-                    className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-10 blur-3xl"
-                />
-                <motion.div
-                    animate={{
-                        scale: [1, 1.3, 1],
-                        x: [0, -50, 0],
-                        y: [0, 50, 0],
-                    }}
-                    transition={{
-                        duration: 20,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                    }}
-                    className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full opacity-10 blur-3xl"
-                />
+                {[...Array(20)].map((_, i) => (
+                    <motion.div
+                        key={i}
+                        animate={{
+                            y: [0, -100, 0],
+                            x: [0, Math.random() * 100 - 50, 0],
+                            opacity: [0, 1, 0],
+                        }}
+                        transition={{
+                            duration: Math.random() * 10 + 10,
+                            repeat: Infinity,
+                            delay: Math.random() * 5,
+                        }}
+                        className="absolute w-2 h-2 bg-purple-500 rounded-full blur-sm"
+                        style={{
+                            left: `${Math.random() * 100}%`,
+                            top: `${Math.random() * 100}%`,
+                        }}
+                    />
+                ))}
             </div>
 
             {/* Header */}
@@ -157,17 +154,50 @@ const Dashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-8 relative z-10"
             >
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent mb-2">
-                    Dashboard
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">Welcome back! Here's what's happening today.</p>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-5xl font-black mb-2 flex items-center space-x-3">
+                            <motion.span
+                                animate={{
+                                    rotate: [0, 360],
+                                }}
+                                transition={{
+                                    duration: 3,
+                                    repeat: Infinity,
+                                    ease: "linear"
+                                }}
+                                className="text-6xl"
+                            >
+                                📊
+                            </motion.span>
+                            <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 dark:from-purple-400 dark:via-pink-400 dark:to-orange-400 bg-clip-text text-transparent">
+                                Dashboard
+                            </span>
+                        </h1>
+                        <p className="text-gray-600 dark:text-gray-400 text-lg">
+                            Welcome back! Here's what's happening today.
+                        </p>
+                    </div>
+
+                    {/* Time Display */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="backdrop-blur-xl bg-white/60 dark:bg-gray-900/60 px-6 py-3 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-xl"
+                    >
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Last Updated</p>
+                        <p className="text-lg font-bold text-gray-900 dark:text-white">
+                            {new Date().toLocaleTimeString()}
+                        </p>
+                    </motion.div>
+                </div>
             </motion.div>
 
             {/* Enhanced Stats Grid with 3D Effects */}
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="card-glass p-6 animate-pulse">
+                        <div key={i} className="backdrop-blur-xl bg-white/60 dark:bg-gray-900/60 p-6 rounded-2xl animate-pulse">
                             <div className="h-14 w-14 bg-gray-300 dark:bg-gray-700 rounded-xl mb-4"></div>
                             <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mb-2"></div>
                             <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
@@ -185,44 +215,124 @@ const Dashboard = () => {
                         <motion.div
                             key={index}
                             variants={staggerItem}
-                            whileHover={{ y: -10, scale: 1.02 }}
-                            className="relative group"
-                            style={{ transformStyle: 'preserve-3d', perspective: '1000px' }}
+                            whileHover={{
+                                y: -15,
+                                scale: 1.03,
+                                rotateY: 5,
+                                rotateX: 5,
+                            }}
+                            className="relative group cursor-pointer"
+                            style={{
+                                transformStyle: 'preserve-3d',
+                                perspective: '1000px',
+                            }}
                         >
-                            {/* Glow Effect */}
-                            <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} rounded-2xl blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-300`} />
+                            {/* Animated Glow Effect */}
+                            <motion.div
+                                className={`absolute -inset-1 bg-gradient-to-r ${stat.color} rounded-2xl blur-xl opacity-0 group-hover:opacity-70 transition-opacity duration-500`}
+                                animate={{
+                                    scale: [1, 1.1, 1],
+                                }}
+                                transition={{
+                                    duration: 3,
+                                    repeat: Infinity,
+                                }}
+                            />
 
                             {/* Card */}
-                            <div className="relative backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-xl overflow-hidden">
-                                {/* Background Pattern */}
-                                <div className={`absolute inset-0 bg-gradient-to-br ${stat.bgColor} opacity-50`} />
+                            <div className="relative backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-2xl overflow-hidden">
+                                {/* Animated Background Pattern */}
+                                <motion.div
+                                    className={`absolute inset-0 bg-gradient-to-br ${stat.bgColor}`}
+                                    animate={{
+                                        backgroundPosition: ['0% 0%', '100% 100%'],
+                                    }}
+                                    transition={{
+                                        duration: 10,
+                                        repeat: Infinity,
+                                        repeatType: 'reverse',
+                                    }}
+                                />
+
+                                {/* Floating Shapes */}
+                                <motion.div
+                                    animate={{
+                                        y: [0, -10, 0],
+                                        rotate: [0, 180, 360],
+                                    }}
+                                    transition={{
+                                        duration: 8,
+                                        repeat: Infinity,
+                                    }}
+                                    className={`absolute top-4 right-4 w-20 h-20 bg-gradient-to-r ${stat.color} rounded-full opacity-10 blur-2xl`}
+                                />
 
                                 <div className="relative z-10">
-                                    {/* Icon */}
+                                    {/* Icon with 3D Effect */}
                                     <motion.div
-                                        whileHover={{ rotate: 360, scale: 1.2 }}
-                                        transition={{ duration: 0.6 }}
+                                        whileHover={{
+                                            rotate: [0, -10, 10, -10, 0],
+                                            scale: 1.2,
+                                        }}
+                                        transition={{ duration: 0.5 }}
                                         className="flex items-center justify-between mb-4"
                                     >
-                                        <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-3xl shadow-lg`}>
-                                            {stat.icon}
-                                        </div>
                                         <motion.div
-                                            animate={{ scale: [1, 1.2, 1] }}
+                                            className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-4xl shadow-2xl ${stat.shadowColor}`}
+                                            animate={{
+                                                boxShadow: [
+                                                    '0 10px 30px rgba(0,0,0,0.1)',
+                                                    '0 20px 40px rgba(0,0,0,0.2)',
+                                                    '0 10px 30px rgba(0,0,0,0.1)',
+                                                ],
+                                            }}
+                                            transition={{
+                                                duration: 3,
+                                                repeat: Infinity,
+                                            }}
+                                        >
+                                            {stat.icon}
+                                        </motion.div>
+
+                                        {/* Pulse Indicator */}
+                                        <motion.div
+                                            animate={{
+                                                scale: [1, 1.5, 1],
+                                                opacity: [1, 0.5, 1],
+                                            }}
                                             transition={{ duration: 2, repeat: Infinity }}
-                                            className={`w-3 h-3 rounded-full bg-gradient-to-r ${stat.color}`}
+                                            className={`w-4 h-4 rounded-full bg-gradient-to-r ${stat.color} shadow-lg`}
                                         />
                                     </motion.div>
 
-                                    {/* Value */}
-                                    <div className={`text-4xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>
+                                    {/* Value with Gradient */}
+                                    <motion.div
+                                        className={`text-5xl font-black bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-2`}
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{ type: "spring", delay: index * 0.1 }}
+                                    >
                                         <AnimatedNumber end={stat.value} prefix={stat.prefix || ''} />
-                                    </div>
+                                    </motion.div>
 
                                     {/* Label */}
-                                    <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                    <div className="text-sm text-gray-600 dark:text-gray-400 font-semibold uppercase tracking-wide">
                                         {stat.label}
                                     </div>
+
+                                    {/* Progress Bar */}
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: '100%' }}
+                                        transition={{ duration: 1, delay: index * 0.2 }}
+                                        className="mt-4 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"
+                                    >
+                                        <motion.div
+                                            animate={{ x: ['-100%', '100%'] }}
+                                            transition={{ duration: 2, repeat: Infinity }}
+                                            className={`h-full w-1/2 bg-gradient-to-r ${stat.color}`}
+                                        />
+                                    </motion.div>
                                 </div>
                             </div>
                         </motion.div>
@@ -237,25 +347,30 @@ const Dashboard = () => {
                 transition={{ delay: 0.4 }}
                 className="relative z-10"
             >
-                <div className="backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-xl">
+                <motion.div
+                    whileHover={{ scale: 1.01 }}
+                    className="backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 p-8 rounded-3xl border border-white/50 dark:border-gray-700/50 shadow-2xl"
+                >
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center space-x-2">
-                            <span>Recent Orders</span>
+                        <h2 className="text-3xl font-black text-gray-900 dark:text-white flex items-center space-x-3">
                             <motion.span
                                 animate={{ rotate: [0, 10, -10, 0] }}
                                 transition={{ duration: 2, repeat: Infinity }}
+                                className="text-4xl"
                             >
                                 📋
                             </motion.span>
+                            <span>Recent Orders</span>
                         </h2>
                         <motion.button
-                            whileHover={{ scale: 1.05 }}
+                            whileHover={{ scale: 1.05, x: 5 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => navigate('/admin/orders')}
-                            className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold shadow-lg hover:shadow-purple-500/50 transition-shadow"
+                            className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white font-bold shadow-xl hover:shadow-purple-500/50 transition-shadow flex items-center space-x-2"
                         >
-                            View All
+                            <span>View All</span>
+                            <span>→</span>
                         </motion.button>
                     </div>
 
@@ -263,24 +378,34 @@ const Dashboard = () => {
                     {loading ? (
                         <div className="space-y-4">
                             {[1, 2, 3].map((i) => (
-                                <div key={i} className="h-16 bg-gray-200 dark:bg-gray-800 rounded animate-pulse"></div>
+                                <div key={i} className="h-16 bg-gray-200 dark:bg-gray-800 rounded-xl animate-pulse"></div>
                             ))}
                         </div>
                     ) : recentOrders.length === 0 ? (
-                        <div className="text-center py-12">
-                            <div className="text-4xl mb-2">📦</div>
-                            <p className="text-gray-600 dark:text-gray-400">No orders yet</p>
-                        </div>
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="text-center py-16"
+                        >
+                            <motion.div
+                                animate={{ y: [0, -10, 0] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                                className="text-6xl mb-4"
+                            >
+                                📦
+                            </motion.div>
+                            <p className="text-xl text-gray-600 dark:text-gray-400 font-semibold">No orders yet</p>
+                        </motion.div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
                                     <tr className="border-b-2 border-gray-200 dark:border-gray-700">
-                                        <th className="text-left py-4 px-4 text-sm font-bold text-gray-700 dark:text-gray-300">Order ID</th>
-                                        <th className="text-left py-4 px-4 text-sm font-bold text-gray-700 dark:text-gray-300">Customer</th>
-                                        <th className="text-left py-4 px-4 text-sm font-bold text-gray-700 dark:text-gray-300">Items</th>
-                                        <th className="text-left py-4 px-4 text-sm font-bold text-gray-700 dark:text-gray-300">Total</th>
-                                        <th className="text-left py-4 px-4 text-sm font-bold text-gray-700 dark:text-gray-300">Status</th>
+                                        <th className="text-left py-4 px-4 text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Order ID</th>
+                                        <th className="text-left py-4 px-4 text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Customer</th>
+                                        <th className="text-left py-4 px-4 text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Items</th>
+                                        <th className="text-left py-4 px-4 text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Total</th>
+                                        <th className="text-left py-4 px-4 text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -292,37 +417,44 @@ const Dashboard = () => {
                                                 initial={{ opacity: 0, x: -20 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ delay: index * 0.1 }}
-                                                whileHover={{ backgroundColor: 'rgba(139, 92, 246, 0.05)' }}
-                                                className="border-b border-gray-100 dark:border-gray-800 transition-colors cursor-pointer"
+                                                whileHover={{
+                                                    backgroundColor: 'rgba(139, 92, 246, 0.05)',
+                                                    scale: 1.01,
+                                                }}
+                                                className="border-b border-gray-100 dark:border-gray-800 transition-all cursor-pointer"
                                                 onClick={() => navigate('/admin/orders')}
                                             >
                                                 <td className="py-4 px-4">
-                                                    <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
+                                                    <span className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                                                         {order.orderNumber}
                                                     </span>
                                                 </td>
                                                 <td className="py-4 px-4">
                                                     <div className="flex items-center space-x-3">
-                                                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm">
+                                                        <motion.div
+                                                            whileHover={{ rotate: 360 }}
+                                                            transition={{ duration: 0.5 }}
+                                                            className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-lg"
+                                                        >
                                                             {(order.user?.name || 'U').charAt(0).toUpperCase()}
-                                                        </div>
-                                                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                                        </motion.div>
+                                                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
                                                             {order.user?.name || 'Customer'}
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className="py-4 px-4 text-sm text-gray-700 dark:text-gray-300">
+                                                <td className="py-4 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">
                                                     {order.items.length} item{order.items.length > 1 ? 's' : ''}
                                                 </td>
                                                 <td className="py-4 px-4">
-                                                    <span className="text-sm font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                                                    <span className="text-sm font-black bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                                                         ₹{order.totalAmount}
                                                     </span>
                                                 </td>
                                                 <td className="py-4 px-4">
                                                     <motion.span
-                                                        whileHover={{ scale: 1.05 }}
-                                                        className={`inline-flex items-center space-x-1 px-3 py-1.5 rounded-full text-xs font-bold ${statusBadge.bg} ${statusBadge.text} shadow-lg`}
+                                                        whileHover={{ scale: 1.1 }}
+                                                        className={`inline-flex items-center space-x-1 px-4 py-2 rounded-full text-xs font-bold ${statusBadge.bg} ${statusBadge.text} shadow-lg`}
                                                     >
                                                         <span>{statusBadge.icon}</span>
                                                         <span className="capitalize">{order.status}</span>
@@ -335,7 +467,7 @@ const Dashboard = () => {
                             </table>
                         </div>
                     )}
-                </div>
+                </motion.div>
             </motion.div>
         </div>
     );
