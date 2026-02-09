@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { google } from 'googleapis';
 
-// Create OAuth2 client
+
 const createOAuth2Client = () => {
   return new google.auth.OAuth2(
     process.env.GMAIL_CLIENT_ID,
@@ -11,7 +11,7 @@ const createOAuth2Client = () => {
   );
 };
 
-// Create transporter with Gmail OAuth2
+
 const createTransporter = async () => {
   const oauth2Client = createOAuth2Client();
   oauth2Client.setCredentials({
@@ -33,22 +33,21 @@ const createTransporter = async () => {
   });
 };
 
-// Generate 6-digit OTP
+
 export const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-// Generate secure reset token
+
 export const generateResetToken = () => {
   return crypto.randomBytes(32).toString('hex');
 };
 
-// Hash token for storage
 export const hashToken = (token) => {
   return crypto.createHash('sha256').update(token).digest('hex');
 };
 
-// Send OTP email
+
 export const sendOTPEmail = async (email, otp, name) => {
   try {
     const transporter = await createTransporter();
@@ -164,7 +163,7 @@ export const sendOTPEmail = async (email, otp, name) => {
   }
 };
 
-// Send password reset email
+
 export const sendPasswordResetEmail = async (email, resetToken, name) => {
   try {
     const transporter = await createTransporter();

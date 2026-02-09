@@ -62,6 +62,16 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/feedback', feedbackRoutes);
 
+// Root route for health checks
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'HostelBite API is running',
+    version: '1.0.0',
+    endpoints: '/api/*'
+  });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({
