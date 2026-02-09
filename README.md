@@ -4,7 +4,8 @@ A full-stack, production-ready hostel canteen ordering and management system fea
 
 ![HostelBite](https://img.shields.io/badge/React-18.x-blue) ![Node.js](https://img.shields.io/badge/Node.js-18.x-green) ![MongoDB](https://img.shields.io/badge/MongoDB-Latest-brightgreen) ![Vite](https://img.shields.io/badge/Vite-5.x-purple) ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.x-cyan)
 
-**Live Demo**: [https://hostel-bite-topaz.vercel.app/](https://hostel-bite-topaz.vercel.app/)
+**Live Demo**: [https://hostel-bite-henna.vercel.app/](https://hostel-bite-henna.vercel.app/)  
+**Backend API**: [https://hostel-bite.onrender.com](https://hostel-bite.onrender.com)
 
 ---
 
@@ -425,15 +426,23 @@ RAZORPAY_KEY_SECRET=...
 
 ## 🚀 Deployment
 
+### Live URLs
+- **Frontend**: [https://hostel-bite-henna.vercel.app/](https://hostel-bite-henna.vercel.app/)
+- **Backend API**: [https://hostel-bite.onrender.com](https://hostel-bite.onrender.com)
+
 ### Frontend (Vercel)
 1. Push to GitHub
 2. Connect to Vercel
-3. Deploy automatically
+3. Set environment variable: `VITE_API_URL=https://hostel-bite.onrender.com/api`
+4. Deploy automatically
 
-### Backend (Render/Railway)
+### Backend (Render)
 1. Push to GitHub
-2. Connect to hosting service
-3. Set environment variables
+2. Connect to Render
+3. Set environment variables:
+   - `NODE_ENV=production`
+   - `CLIENT_URL=https://hostel-bite-henna.vercel.app`
+   - `MONGODB_URL`, `JWT_SECRET`, `GMAIL_*`, `RAZORPAY_*`
 4. Deploy
 
 ### Database (MongoDB Atlas)
