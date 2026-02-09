@@ -13,24 +13,50 @@ const createOAuth2Client = () => {
 
 
 const createTransporter = async () => {
+  // Debug: Log credential status
+  console.log('📧 Email Service - Checking credentials...');
+  console.log('GMAIL_CLIENT_ID:', process.env.GMAIL_CLIENT_ID ? '✅ SET' : '❌ NOT SET');
+  console.log('GMAIL_CLIENT_SECRET:', process.env.GMAIL_CLIENT_SECRET ? '✅ SET' : '❌ NOT SET');
+  console.log('GMAIL_REFRESH_TOKEN:', process.env.GMAIL_REFRESH_TOKEN ? '✅ SET' : '❌ NOT SET');
+  console.log('GMAIL_USER:', process.env.GMAIL_USER ? '✅ SET' : '❌ NOT SET');
+
+  // Validate required credentials
+  if (!process.env.GMAIL_CLIENT_ID || !process.env.GMAIL_CLIENT_SECRET || 
+      !process.env.GMAIL_REFRESH_TOKEN || !process.env.GMAIL_USER) {
+    throw new Error('Missing Gmail OAuth2 credentials. Check environment variables.');
+  }
+
   const oauth2Client = createOAuth2Client();
   oauth2Client.setCredentials({
     refresh_token: process.env.GMAIL_REFRESH_TOKEN,
   });
 
-  const accessToken = await oauth2Client.getAccessToken();
+  try {
+    console.log('📧 Getting access token from refresh token...');
+    const accessToken = await oauth2Client.getAccessToken();
+    
+    if (!accessToken.token) {
+      throw new Error('Failed to get access token - refresh token may be expired or invalid');
+    }
+    
+    console.log('📧 Access token obtained successfully');
 
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      type: 'OAuth2',
-      user: process.env.GMAIL_USER,
-      clientId: process.env.GMAIL_CLIENT_ID,
-      clientSecret: process.env.GMAIL_CLIENT_SECRET,
-      refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-      accessToken: accessToken.token,
-    },
-  });
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        type: 'OAuth2',
+        user: process.env.GMAIL_USER,
+        clientId: process.env.GMAIL_CLIENT_ID,
+        clientSecret: process.env.GMAIL_CLIENT_SECRET,
+        refreshToken: process.env.GMAIL_REFRESH_TOKEN,
+        accessToken: accessToken.token,
+      },
+    });
+  } catch (error) {
+    console.error('📧 OAuth2 Error:', error.message);
+    console.error('📧 Full error:', JSON.stringify(error, null, 2));
+    throw new Error(`Gmail OAuth2 failed: ${error.message}`);
+  }
 };
 
 
