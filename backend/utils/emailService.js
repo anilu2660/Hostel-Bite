@@ -1,63 +1,17 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 import crypto from 'crypto';
-import { google } from 'googleapis';
 
-
-const createOAuth2Client = () => {
-  return new google.auth.OAuth2(
-    process.env.GMAIL_CLIENT_ID,
-    process.env.GMAIL_CLIENT_SECRET,
-    'https://developers.google.com/oauthplayground'
-  );
-};
-
-
-const createTransporter = async () => {
-  // Debug: Log credential status
-  console.log('📧 Email Service - Checking credentials...');
-  console.log('GMAIL_CLIENT_ID:', process.env.GMAIL_CLIENT_ID ? '✅ SET' : '❌ NOT SET');
-  console.log('GMAIL_CLIENT_SECRET:', process.env.GMAIL_CLIENT_SECRET ? '✅ SET' : '❌ NOT SET');
-  console.log('GMAIL_REFRESH_TOKEN:', process.env.GMAIL_REFRESH_TOKEN ? '✅ SET' : '❌ NOT SET');
-  console.log('GMAIL_USER:', process.env.GMAIL_USER ? '✅ SET' : '❌ NOT SET');
-
-  // Validate required credentials
-  if (!process.env.GMAIL_CLIENT_ID || !process.env.GMAIL_CLIENT_SECRET || 
-      !process.env.GMAIL_REFRESH_TOKEN || !process.env.GMAIL_USER) {
-    throw new Error('Missing Gmail OAuth2 credentials. Check environment variables.');
-  }
-
-  const oauth2Client = createOAuth2Client();
-  oauth2Client.setCredentials({
-    refresh_token: process.env.GMAIL_REFRESH_TOKEN,
-  });
-
-  try {
-    console.log('📧 Getting access token from refresh token...');
-    const accessToken = await oauth2Client.getAccessToken();
-    
-    if (!accessToken.token) {
-      throw new Error('Failed to get access token - refresh token may be expired or invalid');
-    }
-    
-    console.log('📧 Access token obtained successfully');
-
-    return nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        type: 'OAuth2',
-        user: process.env.GMAIL_USER,
-        clientId: process.env.GMAIL_CLIENT_ID,
-        clientSecret: process.env.GMAIL_CLIENT_SECRET,
-        refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-        accessToken: accessToken.token,
-      },
-    });
-  } catch (error) {
-    console.error('📧 OAuth2 Error:', error.message);
-    console.error('📧 Full error:', JSON.stringify(error, null, 2));
-    throw new Error(`Gmail OAuth2 failed: ${error.message}`);
+// Lazy-initialize SendGrid — must be deferred because ES module imports
+// are hoisted and run before dotenv.config() loads the .env file.
+let sgInitialized = false;
+const initSendGrid = () => {
+  if (!sgInitialized) {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    sgInitialized = true;
   }
 };
+
+const FROM_EMAIL = () => process.env.SENDGRID_FROM_EMAIL || 'noreply@hostelbite.com';
 
 
 export const generateOTP = () => {
@@ -76,12 +30,12 @@ export const hashToken = (token) => {
 
 export const sendOTPEmail = async (email, otp, name) => {
   try {
-    const transporter = await createTransporter();
-
-    const mailOptions = {
-      from: `HostelBite <${process.env.GMAIL_USER}>`,
+    initSendGrid();
+    const msg = {
       to: email,
+      from: { email: FROM_EMAIL(), name: 'HostelBite' },
       subject: 'Verify Your Email - HostelBite',
+      text: `Hello ${name || 'there'}!\n\nYour HostelBite email verification OTP is: ${otp}\n\nThis code is valid for 10 minutes.\n\nIf you didn't request this, please ignore this email.\n\nThank you,\nHostelBite Team`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -177,14 +131,13 @@ export const sendOTPEmail = async (email, otp, name) => {
         </body>
         </html>
       `,
-      text: `Hello ${name || 'there'}!\n\nYour HostelBite email verification OTP is: ${otp}\n\nThis code is valid for 10 minutes.\n\nIf you didn't request this, please ignore this email.\n\nThank you,\nHostelBite Team`,
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('OTP email sent:', info.messageId);
-    return { success: true, messageId: info.messageId };
+    const [response] = await sgMail.send(msg);
+    console.log('OTP email sent via SendGrid, status:', response.statusCode);
+    return { success: true, statusCode: response.statusCode };
   } catch (error) {
-    console.error('Error sending OTP email:', error);
+    console.error('Error sending OTP email via SendGrid:', error?.response?.body || error.message);
     throw new Error('Failed to send verification email');
   }
 };
@@ -192,13 +145,14 @@ export const sendOTPEmail = async (email, otp, name) => {
 
 export const sendPasswordResetEmail = async (email, resetToken, name) => {
   try {
-    const transporter = await createTransporter();
+    initSendGrid();
     const resetURL = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
-    const mailOptions = {
-      from: `HostelBite <${process.env.GMAIL_USER}>`,
+    const msg = {
       to: email,
+      from: { email: FROM_EMAIL(), name: 'HostelBite' },
       subject: 'Password Reset Request - HostelBite',
+      text: `Hello ${name || 'there'}!\n\nWe received a request to reset your password.\n\nReset your password by clicking this link:\n${resetURL}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this, please ignore this email.\n\nThank you,\nHostelBite Team`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -304,14 +258,13 @@ export const sendPasswordResetEmail = async (email, resetToken, name) => {
         </body>
         </html>
       `,
-      text: `Hello ${name || 'there'}!\n\nWe received a request to reset your password.\n\nReset your password by clicking this link:\n${resetURL}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this, please ignore this email.\n\nThank you,\nHostelBite Team`,
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Password reset email sent:', info.messageId);
-    return { success: true, messageId: info.messageId };
+    const [response] = await sgMail.send(msg);
+    console.log('Password reset email sent via SendGrid, status:', response.statusCode);
+    return { success: true, statusCode: response.statusCode };
   } catch (error) {
-    console.error('Error sending password reset email:', error);
+    console.error('Error sending password reset email via SendGrid:', error?.response?.body || error.message);
     throw new Error('Failed to send password reset email');
   }
 };
